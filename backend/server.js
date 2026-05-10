@@ -20,7 +20,7 @@ app.use(cors({
   origin: [
     "http://localhost:5000",
     "http://localhost:3000",
-    "https://notebookllmsandeep.netlify.app/"  
+    "https://notebookllmsandeep.netlify.app"  
   ],
   methods: ["GET", "POST"],
   allowedHeaders: ["Content-Type"]
