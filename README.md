@@ -1,4 +1,4 @@
-# DocuMind — AI Document Assistant
+# DocuAssist — AI Document Assistant
 
 A **RAG (Retrieval-Augmented Generation)** powered web application that lets you upload documents and ask questions about them in plain English. Answers are generated using **LLaMA 3-70B via Groq**, with context retrieved from a **Qdrant** vector database.
 
