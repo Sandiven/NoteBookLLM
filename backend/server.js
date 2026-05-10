@@ -19,15 +19,7 @@ const __dirname = path.dirname(__filename);
 const app = express();
 
 // Allow requests from frontend (file:// or separate dev server)
-app.use(cors({
-  origin: [
-    "http://localhost:5000",
-    "http://localhost:3000",
-    "https://notebookllmsandeep.netlify.app"  
-  ],
-  methods: ["GET", "POST"],
-  allowedHeaders: ["Content-Type"]
-}));
+app.use(cors());
 
 app.use(express.json());
 
