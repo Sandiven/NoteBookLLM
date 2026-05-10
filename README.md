@@ -94,7 +94,7 @@ PORT=5000
 QDRANT_URL=https://your-cluster.qdrant.io
 QDRANT_API_KEY=your-qdrant-api-key
 COLLECTION_NAME=gen_ai_assign_3
-GROQ_API_KEY=your-groq-api-key
+GROQ_SECRET_KEY=your-groq-api-key
 HF_TOKEN=your-huggingface-token
 ```
 
@@ -106,7 +106,7 @@ HF_TOKEN=your-huggingface-token
 | `QDRANT_URL` | Base URL of your Qdrant instance (cloud or local) | `https://your-cluster.qdrant.io` or `http://localhost:6333` |
 | `QDRANT_API_KEY` | API key for authenticating with Qdrant cloud | `your-qdrant-api-key` |
 | `COLLECTION_NAME` | Default Qdrant collection name (used as fallback) | `gen_ai_assign_3` |
-| `GROQ_API_KEY` | Your Groq API key for LLaMA inference | `gsk_...` |
+| `GROQ_SECRET_KEY` | Your Groq API key for LLaMA inference | `gsk_...` |
 | `HF_TOKEN` | Hugging Face token (for private models, if needed) | `hf_...` |
 
 > **Note:** Each file upload dynamically creates its own Qdrant collection named `<filename>-<timestamp>`. The `COLLECTION_NAME` env var acts as a fallback default.
@@ -267,7 +267,7 @@ The backend is a standard Express.js server and can be deployed to:
 - **Heroku** — `git push heroku main` after setting config vars
 - **VPS / EC2** — Clone, `npm install`, configure `.env`, run with `pm2 start server.js`
 
-> Set all environment variables (`PORT`, `QDRANT_URL`, `QDRANT_API_KEY`, `COLLECTION_NAME`, `GROQ_API_KEY`, `HF_TOKEN`) in your deployment platform's environment settings.
+> Set all environment variables (`PORT`, `QDRANT_URL`, `QDRANT_API_KEY`, `COLLECTION_NAME`, `GROQ_SECRET_KEY`, `HF_TOKEN`) in your deployment platform's environment settings.
 
 ### Deploy Qdrant
 
