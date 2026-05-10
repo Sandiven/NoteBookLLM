@@ -4,11 +4,14 @@ import cors from "cors";
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
+import fs from "fs";  
 
 import uploadRoute from "./routes/upload.route.js";
 import chatRoute from "./routes/chat.route.js";
 
 dotenv.config();
+
+fs.mkdirSync("uploads", { recursive: true }); 
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
