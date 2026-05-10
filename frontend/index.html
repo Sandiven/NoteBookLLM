@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DocuMind — AI Document Assistant</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:          #f0f5ff;
+      --surface:     #ffffff;
+      --surface2:    #e8f0fe;
+      --border:      rgba(59, 130, 246, 0.15);
+      --border2:     rgba(59, 130, 246, 0.3);
+      --accent:      #2563eb;
+      --accent-light:#3b82f6;
+      --accent-pale: #eff6ff;
+      --accent-mid:  #bfdbfe;
+      --text:        #0f172a;
+      --muted:       #64748b;
+      --glow:        rgba(37, 99, 235, 0.18);
+      --shadow:      rgba(37, 99, 235, 0.08);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ─── DECORATIVE SHAPES ─── */
+    .bg-shapes {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .shape {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.12;
+      animation: drift 20s ease-in-out infinite alternate;
+    }
+    .shape-1 { width: 700px; height: 700px; background: radial-gradient(circle, #2563eb, #93c5fd); top: -200px; left: -200px; animation-delay: 0s; }
+    .shape-2 { width: 450px; height: 450px; background: radial-gradient(circle, #3b82f6, #bfdbfe); bottom: -100px; right: -100px; animation-delay: -8s; }
+    .shape-3 { width: 280px; height: 280px; background: radial-gradient(circle, #60a5fa, #dbeafe); top: 45%; left: 55%; animation-delay: -16s; }
+
+    @keyframes drift {
+      from { transform: translate(0, 0) scale(1); }
+      to   { transform: translate(35px, 25px) scale(1.08); }
+    }
+
+    /* ─── NAV ─── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 3rem;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 1px 12px var(--shadow);
+    }
+    .logo {
+      font-family: 'Manrope', sans-serif;
+      font-weight: 800;
+      font-size: 1.4rem;
+      letter-spacing: -0.03em;
+      color: var(--accent);
+    }
+    .logo span { color: #93c5fd; font-weight: 600; }
+    nav a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    nav a:hover { color: var(--accent); }
+
+    /* ─── HERO ─── */
+    .hero {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 8rem 2rem 4rem;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--accent-pale);
+      border: 1px solid var(--accent-mid);
+      border-radius: 100px;
+      padding: 0.4rem 1.1rem;
+      font-size: 0.78rem;
+      color: var(--accent);
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 2rem;
+      animation: fadeUp 0.6s ease both;
+    }
+    .badge-dot {
+      width: 7px; height: 7px;
+      background: var(--accent-light);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity:1; transform:scale(1); }
+      50% { opacity:0.5; transform:scale(1.5); }
+    }
+
+    h1 {
+      font-family: 'Manrope', sans-serif;
+      font-size: clamp(2.6rem, 6.5vw, 5rem);
+      font-weight: 800;
+      line-height: 1.06;
+      letter-spacing: -0.04em;
+      margin-bottom: 1.5rem;
+      color: var(--text);
+      animation: fadeUp 0.6s 0.1s ease both;
+    }
+    h1 .line-accent {
+      color: var(--accent);
+      position: relative;
+    }
+    h1 .line-accent::after {
+      content: '';
+      position: absolute;
+      bottom: 2px;
+      left: 0; right: 0;
+      height: 4px;
+      background: var(--accent-mid);
+      border-radius: 4px;
+      z-index: -1;
+    }
+
+    .hero-sub {
+      max-width: 540px;
+      font-size: 1.05rem;
+      color: var(--muted);
+      line-height: 1.75;
+      margin-bottom: 2.5rem;
+      font-weight: 400;
+      animation: fadeUp 0.6s 0.2s ease both;
+    }
+
+    .cta-group {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      animation: fadeUp 0.6s 0.3s ease both;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.85rem 2rem;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+      box-shadow: 0 4px 20px var(--glow);
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(37, 99, 235, 0.35);
+      background: #1d4ed8;
+    }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-primary svg { width:17px; height:17px; }
+
+    .btn-outline {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.85rem 2rem;
+      background: var(--surface);
+      color: var(--accent);
+      border: 1.5px solid var(--border2);
+      border-radius: 12px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+    }
+    .btn-outline:hover {
+      border-color: var(--accent);
+      background: var(--accent-pale);
+      box-shadow: 0 4px 16px var(--shadow);
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(22px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── DEMO CARD ─── */
+    .hero-visual {
+      margin-top: 4rem;
+      animation: fadeUp 0.8s 0.4s ease both;
+    }
+    .demo-card {
+      width: min(620px, 90vw);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 24px 64px var(--shadow), 0 2px 8px rgba(37,99,235,0.06);
+    }
+    .demo-header {
+      padding: 0.75rem 1rem;
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .dot { width:10px; height:10px; border-radius:50%; }
+    .dot-r { background:#f87171; }
+    .dot-y { background:#fbbf24; }
+    .dot-g { background:#34d399; }
+    .demo-title { margin-left:0.5rem; font-size:0.8rem; color:var(--muted); font-weight:500; }
+    .demo-body { padding: 1.4rem; display:flex; flex-direction:column; gap:0.9rem; }
+
+    .chat-msg { display:flex; gap:0.7rem; align-items:flex-start; }
+    .chat-msg.user { flex-direction:row-reverse; }
+    .avatar {
+      width:30px; height:30px;
+      border-radius:8px;
+      display:grid; place-items:center;
+      font-size:0.75rem; font-weight:700;
+      flex-shrink:0;
+    }
+    .avatar-ai   { background:var(--accent); color:#fff; }
+    .avatar-user { background:var(--surface2); border:1px solid var(--border2); color:var(--accent); }
+
+    .bubble {
+      max-width:80%;
+      padding:0.65rem 1rem;
+      border-radius:12px;
+      font-size:0.85rem;
+      line-height:1.55;
+    }
+    .bubble-ai   { background:var(--surface2); border:1px solid var(--border); color:var(--text); border-bottom-left-radius:4px; }
+    .bubble-user { background:var(--accent); color:#fff; border-bottom-right-radius:4px; }
+
+    .typing-dots span {
+      display:inline-block;
+      width:6px; height:6px;
+      background:var(--muted);
+      border-radius:50%;
+      margin:0 2px;
+      animation:blink 1.2s infinite;
+    }
+    .typing-dots span:nth-child(2) { animation-delay:0.2s; }
+    .typing-dots span:nth-child(3) { animation-delay:0.4s; }
+    @keyframes blink {
+      0%,80%,100% { opacity:0.25; transform:scale(1); }
+      40% { opacity:1; transform:scale(1.25); }
+    }
+
+    /* ─── SUPPORTED FILES ─── */
+    .files-strip {
+      position:relative; z-index:1;
+      background:var(--surface);
+      border-top:1px solid var(--border);
+      border-bottom:1px solid var(--border);
+      padding:2rem 2rem;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:1.2rem;
+      flex-wrap:wrap;
+    }
+    .files-strip .strip-label {
+      font-size:0.78rem;
+      color:var(--muted);
+      font-weight:600;
+      letter-spacing:0.06em;
+      text-transform:uppercase;
+    }
+    .file-badge {
+      display:inline-flex;
+      align-items:center;
+      gap:0.4rem;
+      padding:0.4rem 0.9rem;
+      border-radius:8px;
+      font-size:0.78rem;
+      font-weight:700;
+      letter-spacing:0.04em;
+      background:var(--accent-pale);
+      color:var(--accent);
+      border:1px solid var(--accent-mid);
+    }
+
+    /* ─── FEATURES ─── */
+    .section {
+      position:relative; z-index:1;
+      padding:6rem 2rem;
+      max-width:1100px;
+      margin:0 auto;
+    }
+    .section-label {
+      font-size:0.78rem;
+      font-weight:700;
+      letter-spacing:0.1em;
+      text-transform:uppercase;
+      color:var(--accent);
+      margin-bottom:0.7rem;
+    }
+    .section-title {
+      font-family:'Manrope', sans-serif;
+      font-size:clamp(1.8rem, 4vw, 2.8rem);
+      font-weight:800;
+      letter-spacing:-0.03em;
+      margin-bottom:1rem;
+      color:var(--text);
+    }
+    .section-sub {
+      color:var(--muted);
+      font-size:1rem;
+      line-height:1.75;
+      max-width:520px;
+    }
+
+    .features-grid {
+      margin-top:3.5rem;
+      display:grid;
+      grid-template-columns:repeat(auto-fill, minmax(300px, 1fr));
+      gap:1.2rem;
+    }
+    .feature-card {
+      background:var(--surface);
+      border:1.5px solid var(--border);
+      border-radius:16px;
+      padding:1.8rem;
+      transition:border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+      position:relative;
+      overflow:hidden;
+    }
+    .feature-card::before {
+      content:'';
+      position:absolute;
+      inset:0;
+      opacity:0;
+      transition:opacity 0.3s;
+      background:linear-gradient(135deg, rgba(37,99,235,0.04), transparent);
+    }
+    .feature-card:hover { border-color:var(--accent-light); transform:translateY(-3px); box-shadow:0 12px 32px var(--shadow); }
+    .feature-card:hover::before { opacity:1; }
+    .feature-icon {
+      width:46px; height:46px;
+      border-radius:12px;
+      display:grid; place-items:center;
+      margin-bottom:1.2rem;
+      font-size:1.3rem;
+      background:var(--accent-pale);
+      border:1px solid var(--accent-mid);
+    }
+    .feature-card h3 {
+      font-family:'Manrope', sans-serif;
+      font-size:1rem;
+      font-weight:700;
+      margin-bottom:0.5rem;
+      color:var(--text);
+    }
+    .feature-card p { font-size:0.87rem; color:var(--muted); line-height:1.65; }
+
+    /* ─── CTA BANNER ─── */
+    .cta-banner {
+      position:relative; z-index:1;
+      margin:0 auto;
+      max-width:800px;
+      padding:2rem 2rem 5rem;
+      text-align:center;
+    }
+    .cta-box {
+      background:var(--accent);
+      border-radius:24px;
+      padding:3.5rem;
+      position:relative;
+      overflow:hidden;
+      box-shadow:0 20px 60px rgba(37,99,235,0.3);
+    }
+    .cta-box::before {
+      content:'';
+      position:absolute;
+      width:400px; height:400px;
+      background:rgba(255,255,255,0.06);
+      border-radius:50%;
+      top:-100px; right:-80px;
+      pointer-events:none;
+    }
+    .cta-box h2 {
+      font-family:'Manrope', sans-serif;
+      font-size:clamp(1.6rem, 3.5vw, 2.2rem);
+      font-weight:800;
+      letter-spacing:-0.03em;
+      margin-bottom:1rem;
+      color:#fff;
+    }
+    .cta-box p { color:rgba(255,255,255,0.8); margin-bottom:2rem; line-height:1.7; }
+    .btn-white {
+      display:inline-flex;
+      align-items:center;
+      gap:0.6rem;
+      padding:0.9rem 2.2rem;
+      background:#fff;
+      color:var(--accent);
+      border:none;
+      border-radius:12px;
+      font-family:'Inter', sans-serif;
+      font-size:1rem;
+      font-weight:700;
+      cursor:pointer;
+      text-decoration:none;
+      transition:transform 0.2s, box-shadow 0.2s;
+      box-shadow:0 4px 20px rgba(0,0,0,0.15);
+    }
+    .btn-white:hover { transform:translateY(-2px); box-shadow:0 8px 32px rgba(0,0,0,0.2); }
+
+    /* ─── FOOTER ─── */
+    footer {
+      position:relative; z-index:1;
+      background:var(--surface);
+      border-top:1px solid var(--border);
+      padding:1.5rem 3rem;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      flex-wrap:wrap;
+      gap:1rem;
+    }
+    footer p { font-size:0.82rem; color:var(--muted); }
+
+    @media (max-width: 640px) {
+      nav { padding:1rem 1.2rem; }
+      .section { padding:3.5rem 1.2rem; }
+      .cta-box { padding:2rem 1.5rem; }
+      footer { padding:1.5rem 1.2rem; justify-content:center; text-align:center; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-shapes">
+    <div class="shape shape-1"></div>
+    <div class="shape shape-2"></div>
+    <div class="shape shape-3"></div>
+  </div>
+
+  <!-- NAV -->
+  <nav>
+    <div class="logo">Docu<span>Mind</span></div>
+    <a href="chat.html">Open Chat →</a>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-badge">
+      <div class="badge-dot"></div>
+      Powered by RAG + LLaMA 3
+    </div>
+    <h1>
+      Chat with Your<br>
+      <span class="line-accent">Documents</span> Instantly
+    </h1>
+    <p class="hero-sub">
+      Upload any file — PDF, DOCX, CSV, PPTX and more — and ask questions in plain English. Get precise, context-aware answers powered by vector search and AI.
+    </p>
+    <div class="cta-group">
+      <a href="chat.html" class="btn-primary">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Ask Your Query
+      </a>
+      <a href="#features" class="btn-outline">
+        Learn More
+      </a>
+    </div>
+
+    <!-- DEMO CHAT VISUAL -->
+    <div class="hero-visual">
+      <div class="demo-card">
+        <div class="demo-header">
+          <div class="dot dot-r"></div>
+          <div class="dot dot-y"></div>
+          <div class="dot dot-g"></div>
+          <span class="demo-title">DocuMind Chat</span>
+        </div>
+        <div class="demo-body">
+          <div class="chat-msg user">
+            <div class="avatar avatar-user">U</div>
+            <div class="bubble bubble-user">What are the key findings in the uploaded report?</div>
+          </div>
+          <div class="chat-msg">
+            <div class="avatar avatar-ai">AI</div>
+            <div class="bubble bubble-ai">Based on your document, here are the key findings:<br><br>• Revenue grew by <strong>32%</strong> YoY in Q3<br>• User retention improved to <strong>87%</strong><br>• Three new markets were identified for expansion</div>
+          </div>
+          <div class="chat-msg user">
+            <div class="avatar avatar-user">U</div>
+            <div class="bubble bubble-user">Which markets were identified?</div>
+          </div>
+          <div class="chat-msg">
+            <div class="avatar avatar-ai">AI</div>
+            <div class="bubble bubble-ai">
+              <div class="typing-dots"><span></span><span></span><span></span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SUPPORTED FILES STRIP -->
+  <div class="files-strip">
+    <span class="strip-label">Supports</span>
+    <div class="file-badge">📄 PDF</div>
+    <div class="file-badge">📝 DOCX</div>
+    <div class="file-badge">📊 CSV</div>
+    <div class="file-badge">📑 PPTX</div>
+    <div class="file-badge">📋 JSON</div>
+    <div class="file-badge">📃 TXT</div>
+  </div>
+
+  <!-- FEATURES -->
+  <section class="section" id="features">
+    <div class="section-label">How it works</div>
+    <h2 class="section-title">Intelligent Document Intelligence</h2>
+    <p class="section-sub">From upload to insight in seconds. Our RAG pipeline ensures every answer is grounded in your actual data.</p>
+
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">📤</div>
+        <h3>Upload Any File</h3>
+        <p>Drag & drop or browse to upload PDFs, Word docs, spreadsheets, presentations, and more. We handle the parsing.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔍</div>
+        <h3>Vector Search</h3>
+        <p>Documents are chunked, embedded, and stored in Qdrant vector DB — enabling semantic similarity search across all content.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🧠</div>
+        <h3>LLaMA 3 Answers</h3>
+        <p>Queries are answered using LLaMA 3-70B via Groq, with retrieved context fed directly — no hallucinations, only facts.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <h3>Blazing Fast</h3>
+        <p>Groq's inference engine delivers LLaMA responses at lightning speed. Ask a question, get answers in under a second.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔒</div>
+        <h3>Context-Grounded</h3>
+        <p>Answers are strictly derived from your uploaded documents. If the answer isn't in your file, the AI will tell you so.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">💬</div>
+        <h3>Natural Language</h3>
+        <p>No need for special syntax. Ask questions the same way you'd ask a colleague — the AI understands context and nuance.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <div class="cta-banner">
+    <div class="cta-box">
+      <h2>Ready to unlock your documents?</h2>
+      <p>Upload a file and start asking questions. It takes less than 30 seconds to get your first answer.</p>
+      <a href="chat.html" class="btn-white">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Ask Your Query Now
+      </a>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="logo" style="font-size:1.1rem;">Docu<span>Mind</span></div>
+    <p>RAG-powered document assistant · Built with LangChain, Qdrant &amp; Groq</p>
+  </footer>
+</body>
+</html>
